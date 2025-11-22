@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # Kontener 1: Twoja aplikacja w Pythonie (Backend)
+  python-app:
+    build: .             # Buduje obraz z Twojego Dockerfile w tym katalogu
+    container_name: backend-python
+    expose:
+      - "8080"           # Wystawia port TYLKO do sieci wewnętrznej (nie na zewnątrz)
+    networks:
+      - lab-network
+
+  # Kontener 2: Nginx (Frontend/Proxy)
+  nginx-proxy:
+    image: nginx:latest
+    container_name: frontend-nginx
+    ports:
+      - "80:80"          # Mapuje port 80 serwera na 80 kontenera
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro # Wrzuca nasz konfig do środka
+    depends_on:
+      - python-app       # Czeka aż Python wstanie
+    networks:
+      - lab-network
+
+# Definicja wirtualnej sieci
+networks:
+  lab-network:
+    driver: bridge
